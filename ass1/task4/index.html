@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script type="text/javascript">
+
+	let tags = ['StreetName','Suburb','Postcode','Date of birth'];
+	let cbs = ['Heating', 'AirConditioning', 'Pool', 'Sandpit'];
+
+	function reset(){
+		tags.forEach(item => document.getElementById(item).value = "");		
+		cbs.forEach(item => document.getElementById(item).checked = false);
+		document.getElementById('Building Type').value = "Apartment";
+		document.getElementById('render').value = "";
+	}
+
+	function selectAll(){		
+		if(CheckedBoxes().length == 4){cbs.forEach(item => document.getElementById(item).checked = false);}else{cbs.forEach(item => document.getElementById(item).checked = true);}	
+	}
+
+	function CheckedBoxes(){
+		var textinputs = document.querySelectorAll('input[type=checkbox]');
+		var checkedBox = [];
+		textinputs.forEach(function(i){if(i.checked) checkedBox.push(i.value);})
+			
+		return checkedBox;
+	}
+
+	function render(flag){
+		document.getElementById('render').value = `Please input a valid ${flag}`
+	}
+
+	function diff_years(dt2, dt1) {
+		var diff =(dt2 - dt1) / 1000;
+   		diff /= (60 * 60 * 24);
+  		return Math.abs(Math.round(diff/365.25));
+   	}
+
+   	function displayBuildingTypes(){
+   		let cb = CheckedBoxes();
+   		let len = cb.length;
+   			if (len==0) return 'no features';
+   			else{
+   				let str = `${cb[0]}`
+   				if(len==1) return str;
+   				for(i=1;i<len-1;i++){str+=`, ${cb[i]}`;}
+   				return str+` and ${cb[len-1]}`
+   			}  			
+   	}
+
+	function check(){
+		let sn_val = document.getElementById('StreetName').value;
+		let sb_val = document.getElementById('Suburb').value;
+		let pc_val = document.getElementById('Postcode').value;
+		let dob_val = document.getElementById('Date of birth').value;
+		let bd_val = document.getElementById('Building Type').value;
+		if(sn_val.length<3||sn_val.length>50){
+			render('Street Name');
+		}
+		else if(sb_val.length<3||sb_val.length>50){
+			render('Suburb');
+		}else if(! /^\d{4}$/.test(pc_val)){
+			render('Postcode');
+		}else if(! (/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/.test(dob_val)&&Date.parse(dob_val))){
+			render('Date of birth');
+		}else{
+			document.getElementById('render').value = `Your are ${diff_years(Date.now(),Date.parse(dob_val))} years old, and your address is ${sn_val} St, ${sb_val}, ${pc_val}, Australia. Your building is ${(/^[aeiou]/.test(bd_val.toLowerCase())?('an'):('a'))} ${bd_val.toLowerCase()}, and it has ${displayBuildingTypes()}`
+		}
+		}
+	
+	window.onload = function(){
+		tags.forEach(function(i){
+			document.getElementById(i).addEventListener('click', check);
+			document.getElementById(i).addEventListener('keyup', check);
+		})
+		document.getElementById('selectAll').addEventListener('click', check);
+		cbs.forEach(item => document.getElementById(item).addEventListener('click', check));	
+	}
+	
+
+	
+	</script>
+
+</head>
+<body>
+
+<table border="1">
+<tr><td>Street Name</td><td><form style="margin: 0" ><textarea id ="StreetName" rows="1" ></textarea></form></td></tr>
+<tr><td>Suburb</td><td><form style="margin: 0"><textarea id ="Suburb" rows="1"></textarea></form></td></tr>
+<tr><td>Postcode</td><td><form style="margin: 0"><textarea id ="Postcode" rows="1"></textarea></form></td></tr>
+<tr><td>Date of birth</td><td><form style="margin: 0"><textarea id ="Date of birth" rows="1"></textarea></form></td></tr>
+<tr><td>Building Type</td><td><form style="margin: 0"><select id="Building Type" class="dropdown-content" onchange="check()">
+	<option selected="selected">Apartment</option>
+	<option>House</option>
+
+</select></form></td></tr>
+<tr><td>Features</td>
+	<td><ul style="padding: 0"><input value = "Heating" id = "Heating" type="checkbox">Heating</ul>
+		<ul style="padding: 0"><input value = "AirConditioning" id = "AirConditioning" type="checkbox">AirConditioning</ul>
+		<ul style="padding: 0"><input value = "Pool" id = "Pool" type="checkbox">Pool</ul>
+		<ul style="padding: 0"><input value = "Sandpit" id = "Sandpit" type="checkbox">Sandpit</ul>
+		<button id="selectAll" onclick="selectAll()">Select All</button>
+
+	</td></tr>
+</table>
+
+<button id="reset" onclick="reset()">reset</button>
+
+<form>
+	<textarea id="render" rows="7" cols="40"></textarea>
+</form>
+
+</body>
+</html>
